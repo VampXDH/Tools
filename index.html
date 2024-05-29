@@ -3,29 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request Tracker</title>
-    <style>
-        /* Tambahkan styling sesuai keinginan */
-    </style>
+    <title>Static Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>Request Tracker</h1>
-    <ul id="requestList">
-        <!-- Daftar request akan ditampilkan di sini -->
-    </ul>
+    <canvas id="myChart" width="400" height="400"></canvas>
+
     <script>
-        // JavaScript untuk mengambil data request dan menampilkannya
-        fetch('https://xcddos.my.id/dstat')
-            .then(response => response.json())
-            .then(data => {
-                const requestList = document.getElementById('requestList');
-                data.forEach(request => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = request; // Ubah sesuai dengan struktur data response
-                    requestList.appendChild(listItem);
-                });
-            })
-            .catch(error => console.error('Error fetching data:', error));
+        // Data statis
+        const labels = ['January', 'February', 'March', 'April', 'May', 'June'];
+        const data = [65, 59, 80, 81, 56, 55];
+
+        // Membuat grafik
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Requests',
+                    data: data,
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
     </script>
 </body>
 </html>
