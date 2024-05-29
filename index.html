@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Tracker</title>
+    <style>
+        /* Tambahkan styling sesuai keinginan */
+    </style>
+</head>
+<body>
+    <h1>Request Tracker</h1>
+    <ul id="requestList">
+        <!-- Daftar request akan ditampilkan di sini -->
+    </ul>
+    <script>
+        // JavaScript untuk mengambil data request dan menampilkannya
+        fetch('https://xcddos.my.id/dstat')
+            .then(response => response.json())
+            .then(data => {
+                const requestList = document.getElementById('requestList');
+                data.forEach(request => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = request; // Ubah sesuai dengan struktur data response
+                    requestList.appendChild(listItem);
+                });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    </script>
+</body>
+</html>
