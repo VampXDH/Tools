@@ -3,26 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Static Graph</title>
+    <title>Requests per Second</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <canvas id="myChart" width="400" height="400"></canvas>
+    <canvas id="requestChart" width="800" height="400"></canvas>
 
     <script>
-        // Data statis
-        const labels = ['January', 'February', 'March', 'April', 'May', 'June'];
-        const data = [65, 59, 80, 81, 56, 55];
+        const requestsData = []; // Array untuk menyimpan data permintaan per detik
+        const allowedRequests = []; // Array untuk menyimpan jumlah permintaan yang diizinkan per detik
+        const blockedRequests = []; // Array untuk menyimpan jumlah permintaan yang diblokir per detik
+
+        // Fungsi untuk menghitung jumlah permintaan dalam satu detik
+        function updateRequestsData() {
+            const currentTime = new Date().getTime();
+            const lastSecond = currentTime - 1000; // 1000 ms = 1 detik
+            const requestsLastSecond = requestsData.filter(requestTime => requestTime > lastSecond).length;
+
+            requestsData.push(currentTime); // Menambahkan waktu permintaan ke array
+            if (requestsData.length > 10) {
+                requestsData.shift(); // Menghapus waktu permintaan yang sudah lebih dari 10 detik yang lalu
+            }
+
+            const allowed = Math.floor(Math.random() * requestsLastSecond); // Contoh: jumlah permintaan yang diizinkan secara acak
+            const blocked = requestsLastSecond - allowed;
+
+            allowedRequests.push(allowed); // Menambahkan jumlah permintaan yang diizinkan ke array
+            blockedRequests.push(blocked); // Menambahkan jumlah permintaan yang diblokir ke array
+
+            if (allowedRequests.length > 10) {
+                allowedRequests.shift(); // Menghapus data yang sudah lebih dari 10 detik yang lalu
+                blockedRequests.shift(); // Menghapus data yang sudah lebih dari 10 detik yang lalu
+            }
+
+            return requestsLastSecond;
+        }
 
         // Membuat grafik
-        const ctx = document.getElementById('myChart').getContext('2d');
+        const ctx = document.getElementById('requestChart').getContext('2d');
         const myChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: labels,
+                labels: [],
                 datasets: [{
-                    label: 'Requests',
-                    data: data,
+                    label: 'Allowed Requests per Second',
+                    data: allowedRequests,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Blocked Requests per Second',
+                    data: blockedRequests,
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
                     borderColor: 'rgba(255, 99, 132, 1)',
                     borderWidth: 1
@@ -36,6 +68,23 @@
                 }
             }
         });
+
+        // Fungsi untuk memperbarui grafik dengan data terbaru
+        function updateChart() {
+            const requestsLastSecond = updateRequestsData();
+
+            // Menambahkan data baru ke grafik
+            myChart.data.labels.push(new Date().toLocaleTimeString());
+            myChart.data.datasets[0].data.push(requestsLastSecond);
+            myChart.data.datasets[1].data.push(requestsLastSecond); // Jumlah permintaan yang diblokir sama dengan jumlah permintaan per detik
+            myChart.update();
+
+            // Setel waktu pembaruan
+            setTimeout(updateChart, 1000); // Pembaruan setiap detik
+        }
+
+        // Memulai pembaruan grafik
+        updateChart();
     </script>
 </body>
 </html>
