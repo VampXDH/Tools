@@ -1,81 +1,45 @@
-const apiToken = 'nbYYnwZpJA0ZPP8MFUsDbH61SstxfsaPIP41vGsl';
-const zoneId = '5876d9a743da34d3204658aa2b2c9c4a';
+const ctx = document.getElementById('requestsChart').getContext('2d');
+const requestsData = {
+    labels: [],
+    datasets: [{
+        label: 'Requests Per Second',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        data: [],
+    }]
+};
 
-let chart;
-
-async function getRequestData() {
-    const response = await fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}/analytics/dashboard?since=-7200&continuous=true`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${apiToken}`,
-            'Content-Type': 'application/json'
-        }
-    });
-
-    const data = await response.json();
-    return data.result.timeseries;
-}
-
-function parseData(data) {
-    return data.map(item => ({
-        timestamp: new Date(item.since),
-        requests: item.requests.all
-    }));
-}
-
-function drawChart(data) {
-    const ctx = document.getElementById('myChart').getContext('2d');
-    if (chart) {
-        chart.data.labels = data.map(item => item.timestamp);
-        chart.data.datasets[0].data = data.map(item => item.requests);
-        chart.update();
-    } else {
-        chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.map(item => item.timestamp),
-                datasets: [{
-                    label: 'Requests Per Second',
-                    data: data.map(item => item.requests),
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1,
-                    fill: false
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            unit: 'minute'
-                        },
-                        title: {
-                            display: true,
-                            text: 'Time'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Requests Per Second'
-                        }
+const config = {
+    type: 'line',
+    data: requestsData,
+    options: {
+        responsive: true,
+        scales: {
+            x: {
+                type: 'realtime',
+                realtime: {
+                    duration: 20000,
+                    refresh: 1000,
+                    delay: 2000,
+                    onRefresh: async function(chart) {
+                        const response = await fetch('https://api.example.com/requests-per-second');
+                        const data = await response.json();
+                        const now = Date.now();
+                        chart.data.labels.push(now);
+                        chart.data.datasets.forEach(dataset => {
+                            dataset.data.push({
+                                x: now,
+                                y: data.requestsPerSecond
+                            });
+                        });
                     }
                 }
+            },
+            y: {
+                beginAtZero: true
             }
-        });
+        }
     }
-}
+};
 
-async function updateChart() {
-    const requestData = await getRequestData();
-    const parsedData = parseData(requestData);
-    drawChart(parsedData);
-}
-
-function startUpdatingChart(interval) {
-    updateChart();
-    setInterval(updateChart, interval);
-}
-
-// Mulai memperbarui grafik setiap 10 detik (10000 ms)
-startUpdatingChart(10000);
+const requestsChart = new Chart(ctx, config);
