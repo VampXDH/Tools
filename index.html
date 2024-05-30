@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Requests Per Second</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Requests Per Second Graph</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Requests Per Second</h1>
-    <canvas id="myChart" width="400" height="200"></canvas>
+    <div class="container">
+        <h1>Requests Per Second</h1>
+        <canvas id="requestsChart" width="400" height="200"></canvas>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
