@@ -1,0 +1,48 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.keys import Keys
+import time
+
+class CaptchaBypass:
+    def __init__(self, driver_path):
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # Menjalankan Chrome dalam mode headless
+        service = Service(driver_path)
+        self.driver = webdriver.Chrome(service=service, options=chrome_options)
+    
+    def open_page(self, url):
+        self.driver.get(url)
+        time.sleep(2)  # Memberikan waktu untuk halaman memuat
+
+    def solve_captcha(self):
+        # Mengklik checkbox CAPTCHA
+        try:
+            captcha_checkbox = self.driver.find_element(By.XPATH, '//*[@id="qquD4"]/div/label/input')
+            captcha_checkbox.click()
+        except:
+            captcha_checkbox = self.driver.find_element(By.XPATH, '/html/body//div/div/div[1]/div/label/input')
+            captcha_checkbox.click()
+        
+        time.sleep(2)  # Tunggu sebentar untuk memastikan CAPTCHA diproses
+
+    def get_cookies(self):
+        cookies = self.driver.get_cookies()
+        return {cookie['name']: cookie['value'] for cookie in cookies}
+
+    def close_browser(self):
+        self.driver.quit()
+
+# Penggunaan
+if __name__ == "__main__":
+    driver_path = "/path/to/chromedriver"  # Ganti dengan path ke chromedriver di sistem Anda
+    captcha_solver = CaptchaBypass(driver_path)
+    
+    captcha_solver.open_page("https://example.com")  # Ganti dengan URL halaman yang ingin diakses
+    captcha_solver.solve_captcha()
+    
+    cookies = captcha_solver.get_cookies()
+    print("Cookies:", cookies)
+    
+    captcha_solver.close_browser()
