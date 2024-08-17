@@ -1,20 +1,52 @@
-from time import sleep
-from DrissionPage import ChromiumPage
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+import time
 
-# Inisialisasi ChromiumPage
-p = ChromiumPage()
+def bypass_captcha_and_get_cookie(url):
+    # Setup Chrome options
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # Run in headless mode
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    
+    # Initialize the WebDriver
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    
+    try:
+        # Open the target URL
+        driver.get(url)
+        
+        # Wait for the page to load
+        time.sleep(3)
+        
+        # Locate and click the CAPTCHA checkbox
+        checkbox = driver.find_element(By.CSS_SELECTOR, "#qquD4 > div > label > input[type=checkbox]")
+        checkbox.click()
+        
+        # Wait for CAPTCHA to process
+        time.sleep(5)
+        
+        # Extract cookies after CAPTCHA is solved
+        cookies = driver.get_cookies()
+        
+        # Print cookies for demonstration
+        for cookie in cookies:
+            print(f"Cookie: {cookie['name']} = {cookie['value']}")
+        
+        return cookies
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    
+    finally:
+        # Close the WebDriver
+        driver.quit()
 
-# Membuka halaman yang diinginkan
-p.get('https://panel.f-network.my.id/')
-
-# Mengambil iframe yang sesuai
-i = p.get_frame('@src^="https://challenges.cloudflare.com/cdn-cgi"')
-
-# Menemukan elemen dengan class `.mark`
-e = i('.mark')
-
-# Menunggu beberapa detik sebelum klik
-sleep(3)
-
-# Melakukan klik pada elemen
-e.click()
+# Example usage
+if __name__ == "__main__":
+    url = "https://example.com"  # Replace with your target URL
+    cookies = bypass_captcha_and_get_cookie(url)
+    # Further processing with the cookies if needed
